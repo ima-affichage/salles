@@ -1,0 +1,33 @@
+name: Relevé Celcat
+
+on:
+  schedule:
+    - cron: "17 4 * * *"      # chaque jour à 04:17 UTC (5h17 ou 6h17 à Paris)
+  workflow_dispatch:           # lancement manuel possible
+    inputs:
+      date:
+        description: "Date AAAA-MM-JJ (vide = aujourd'hui)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  releve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Relevé
+        env:
+          DATE: ${{ github.event.inputs.date }}
+        run: python releve.py $DATE
+      - name: Enregistrer le résultat
+        run: |
+          git config user.name "releve-celcat"
+          git config user.email "actions@users.noreply.github.com"
+          git add data.json
+          git diff --cached --quiet || (git commit -m "Relevé du $(date +%F)" && git push)
