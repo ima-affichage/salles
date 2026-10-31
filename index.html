@@ -39,49 +39,15 @@ const MODE_TEST = true;          // true : ignore la date des données et affich
 const SECONDES_PAR_PAGE = 10;    // durée d'affichage de chaque page
 const HEURE_BASCULE = "13:00";   // limite matin / après-midi
 
-/* ===== Données de test (journée du 02/11) =====
-   Format : [début, fin, groupes, UE, enseignants, salles] */
-const G46 = ["L3 IMSAT S5 - GR4", "L3 IMSAT S5 - GR5", "L3 IMSAT S5 - GR6"];
-const G13 = ["L3 IMSAT S5 - GR1", "L3 IMSAT S5 - GR2", "L3 IMSAT S5 - GR3"];
-const M2 = ["4TYB901S M2 Systèmes embarqués S9", "M2 MA IMAA"];
-const I3 = ["4TCO703S - IMSC", "4TNS703S - IMAS"];
-const API = "IIAPI3-1ère année ENSPIMA";
-const DONNEES = { date: "2026-11-02", evenements: [
-  ["08:10","10:00","4TNV703S - IMAA","4TNV704U - Régulation et propulsion","CAZAURANG Franck","INFO-1"],
-  ["08:10","10:00",G46,"4TIM513U Techniques mathématiques","GRACIA Alexandrine","11"],
-  ["08:10","10:00",M2,"4TNV914U - Cybersécurité (CMI)","GUIRRIEC Maryse","13"],
-  ["08:10","10:00","LproMA_Avio","4TSI504U Formation spéavionique : Géné Elec","BOMPAS Jonathan","107"],
-  ["08:10","10:00",G13,"4TIM515U Signaux analogiques","GIREMUS Audrey","116"],
-  ["08:10","10:00","LproMA_Struct","4TSI505U Formation spé structure : Matériaux métallique","AUBERT Isabelle","208"],
-  ["08:10","10:00","4TCO703S - IMSC","4TCO702U - Production I et productique","ALBERT Gaëtan","209"],
-  ["08:10","11:00",API,"API5-NUSPI - Statistique pour l'ingénieur","SARACCO Jerome","12"],
-  ["08:10","11:45","4TCO901S - M2 ISC","4TCO905U - MEF Hypermesh","DELTHEIL Benoit","INFO-4"],
-  ["08:10","12:10",["IMAS1","IMAS2"],"4TIM723U - Méthodes et pratiques de maintenance aéronautique 1","FERREIRA Eva","LABO CND"],
-  ["09:00","12:00","IIAPI5 - 3ème année ENSPIMA","API0-PROJR","LACANETTE Delphine","INFO-2"],
-  ["10:20","12:10","M2 MA IMAS","4TNS907U - Dynamique des structures","RODRIGUEZ Samuel","AMPHI ROSE"],
-  ["10:20","12:10",G13,"4TIM513U Techniques mathématiques","LEDUC Roxane","11"],
-  ["10:20","12:10",["4TNV703S - IMAA","4TYB703S - IMSE"],["4TNV704U - Lois de commande et dynamique de vol","4TYB709U - Commande et programmation"],"AIRIMITOAIE Tudor Bogdan","13"],
-  ["10:20","12:10","LproMA_Avio","4TSI504U Formation pro. spécialisée Avio : RDNAV I","BEUILLÉ Olivier","107"],
-  ["10:20","12:10",G46,"4TIM515U Signaux analogiques","SOBAS Justin","116"],
-  ["10:20","12:10",M2,"4TNV914U - Cybersécurité (CMI)","GUIRRIEC Maryse","120"],
-  ["10:20","12:10","LproMA_Struct","4TSI505U Formation spé structure : Matériaux métallique","AUBERT Isabelle","208"],
-  ["10:20","12:10","4TCO703S - IMSC","4TCO702U - Production I et productique","ALBERT Gaëtan","209"],
-  ["11:10","12:30",API,"API5-NUTDS - Traitement Du Signal","GAIGNARD Antoine","12"],
-  ["13:30","15:20","L3 IMSAT","4TIM513U Techniques mathématiques","GIREMUS Audrey","AMPHI ROSE"],
-  ["13:30","15:20",I3,"4TIM720U - Vibrations I","FRANCOIS Pierre","AMPHI GRAND"],
-  ["13:30","15:20","LproMA","4TSI503U Matière scientifique : Hydraulique","ALBERT Gaëtan","107"],
-  ["13:30","17:20",M2,"4TNV914U RTOS pour l'Aéronautique (CMI)","TANG Thomas","LABO ELECTRONIQUE VHDL"],
-  ["13:30","17:20","M2 MA IMAS2","4TNS907U - Dynamique des structures","RODRIGUEZ Samuel","LABO MECANIQUE"],
-  ["13:30","17:30",["IMAA1","IMAA2"],"4TNV704U - Régulation et propulsion","FARGES Christophe","INFO-1"],
-  ["14:00","15:20",API,"API5-MFSEC -Systèmes Embarqués - Charges Utiles","GATTI Marc","12"],
-  ["15:30","18:20","ENSPIMA 1A - GR1","API5-NUCBI - Cours de Base Informatique","BOUKIR Samia","INFO-2"],
-  ["15:30","18:30","ENSPIMA 1A - GR2","API5-SIODC - Orientation et Développement de Carrière","TIRANT Sandrine","12"],
-  ["15:40","17:30",I3,"4TIM723U - Méthodes et pratiques de maintenance aéronautique 1","MALBERT-SAYSSET Nathalie","13"],
-  ["15:40","17:30","LproMA","4TSI503U Matière scientifique : Maths","FRANCOIS Pierre","107"],
-  ["15:40","18:30",["L3 IMSAT S5 - GR4","L3 IMSAT S5 - GR5"],"4TIM516U Génération électrique",["DESTIBARDE Jean-Michel","GIRARD Dimitri","VIDAUPORTE François"],["HANGAR DC9","HANGAR MERCURE","HANGAR SALLE 015a"]],
-  ["15:40","18:30",["L3 IMSAT S5 - GR2","L3 IMSAT S5 - GR3"],"4TIM516U Initiation aux systèmes aéronautiques","MICHAUD Denis",["INFO-3","LABO AVIONIQUE","11"]],
-  ["17:15","18:30","Extérieur NOVAE","Conférence","","AMPHI GRAND"]
-]};
+/* ===== Données (lues dans data.json, produit par releve.py) ===== */
+let DONNEES = null;
+async function charger() {
+  try {
+    const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    DONNEES = await r.json();
+  } catch (e) { DONNEES = null; }
+}
 
 /* ===== Outils ===== */
 const L = x => Array.isArray(x) ? x : (x ? [x] : []);
@@ -106,7 +72,7 @@ const tr = (e, i) => `<tr class="${i % 2 ? "i" : "p"}"><td>${e[0]} - ${e[1]}</td
 const tab = h => `<table><colgroup><col style="width:11%"><col style="width:24%"><col style="width:25%"><col style="width:24%"><col style="width:16%"></colgroup><tbody>${h}</tbody></table>`;
 
 /* ===== Affichage ===== */
-let pages = [], cur = 0, timer = null, cle = "", version = 0, tCourante = "";
+let pages = [], cur = 0, timer = null, cle = "", version = 0, tCourante = "", dernier = 0, indispo = false;
 
 function message(txt) {
   document.getElementById("zone").innerHTML = `<div id="msg">${txt}</div>`;
@@ -123,13 +89,17 @@ function afficher(ev) {
 async function construire() {
   const v = ++version;
   clearInterval(timer);
-  const jourAffiche = MODE_TEST ? DONNEES.date : paris().jour;
+  dernier = Date.now();
+  indispo = false;
+  await charger();
+  if (v !== version) return;
+  const jourAffiche = (MODE_TEST && DONNEES) ? DONNEES.date : paris().jour;
   document.getElementById("titre").textContent = "Emploi du temps du " +
     new Date(jourAffiche + "T12:00:00").toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
   const t = tranche();
   tCourante = t;
   cle = t + paris().jour;
-  if (!MODE_TEST && DONNEES.date !== paris().jour) return message("Planning indisponible");
+  if (!DONNEES || (!MODE_TEST && DONNEES.date !== paris().jour)) { indispo = true; return message("Planning indisponible"); }
   const ev = lignes(t);
   if (!ev.length) return message("Aucune occupation de salle");
 
@@ -158,7 +128,7 @@ async function construire() {
 }
 
 construire();
-setInterval(() => { if (tranche() + paris().jour !== cle) construire(); }, 30000);
+setInterval(() => { if (tranche() + paris().jour !== cle || (indispo && Date.now() - dernier > 300000)) construire(); }, 30000);
 let rt;
 addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(construire, 300); });
 </script>
