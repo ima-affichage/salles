@@ -93,7 +93,7 @@ const lignes = t => DONNEES.evenements
   .filter(e => t === "matin" ? e[0] < HEURE_BASCULE : e[1] > HEURE_BASCULE)
   .sort((a, b) => (a[0] + a[1] + (L(a[5])[0] || "")).localeCompare(b[0] + b[1] + (L(b[5])[0] || "")));
 const tr = (e, i) => `<tr class="${i % 2 ? "i" : "p"}"><td>${e[0]} - ${e[1]}</td><td>${cell(e[2])}</td><td>${cell(e[3])}</td><td>${cell(e[4])}</td><td>${cell(e[5])}</td></tr>`;
-const tab = h => `<table><colgroup><col style="width:11%"><col style="width:27%"><col style="width:22%"><col style="width:24%"><col style="width:16%"></colgroup><tbody>${h}</tbody></table>`;
+const tab = h => `<table><colgroup><col style="width:11%"><col style="width:24%"><col style="width:25%"><col style="width:24%"><col style="width:16%"></colgroup><tbody>${h}</tbody></table>`;
 
 /* ===== Affichage ===== */
 let pages = [], cur = 0, timer = null, cle = "", version = 0, tCourante = "";
