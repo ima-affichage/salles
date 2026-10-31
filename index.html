@@ -7,19 +7,29 @@
 <link rel="stylesheet" href="https://use.typekit.net/ehl7xwa.css">
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #fefefe; }
+  body { display: flex; flex-direction: column; }
+  #zone { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #entete th { color: #fff; background: #0077B6; font-weight: 700; font-size: xx-large; padding: .5em 0;
+               box-shadow: 0 2px rgba(0,0,0,.4); }
+  #entete .titre { border-bottom: 1px dashed #000; }
   table { width: 100%; border-spacing: 0; table-layout: fixed; color: #000;
           font-family: "brix-slab", arial; font-weight: 400; font-size: x-large; text-align: center; }
   td { padding: 1em .2em; vertical-align: middle; overflow-wrap: anywhere; }
   tr.p { color: #0077B6; background: #fefefe; }
   tr.i { color: #fefefe; background: #0077B6; }
   #mesure { position: absolute; left: 0; top: 0; width: 100%; visibility: hidden; }
-  #msg { display: flex; height: 100vh; align-items: center; justify-content: center; color: #0077B6;
+  #msg { display: flex; flex: 1; align-items: center; justify-content: center; color: #0077B6;
          font-family: "brix-slab", arial; font-size: xx-large; font-weight: 700; }
   #pg { position: fixed; right: 6px; bottom: 4px; background: #ff0; color: #000;
         font: 16px arial; padding: 2px 8px; }
 </style>
 </head>
 <body>
+<table id="entete"><colgroup><col style="width:11%"><col style="width:24%"><col style="width:25%"><col style="width:24%"><col style="width:16%"></colgroup>
+<thead>
+<tr><th class="titre" colspan="5" id="titre"></th></tr>
+<tr><th>Heure</th><th>Groupe(s)</th><th>UE</th><th>Intervenant(s)</th><th>Salle</th></tr>
+</thead></table>
 <div id="zone"></div>
 <div id="mesure"></div>
 <div id="pg" hidden></div>
@@ -113,6 +123,9 @@ function afficher(ev) {
 async function construire() {
   const v = ++version;
   clearInterval(timer);
+  const jourAffiche = MODE_TEST ? DONNEES.date : paris().jour;
+  document.getElementById("titre").textContent = "Emploi du temps du " +
+    new Date(jourAffiche + "T12:00:00").toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
   const t = tranche();
   tCourante = t;
   cle = t + paris().jour;
@@ -128,7 +141,7 @@ async function construire() {
   ]).catch(() => {});
   if (v !== version) return;
 
-  const H = window.innerHeight - 2;
+  const H = window.innerHeight - document.getElementById("entete").offsetHeight - 2;
   pages = [];
   let page = [], h = 0;
   m.querySelectorAll("tr").forEach((r, i) => {
