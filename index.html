@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Test affichage</title>
+<link rel="stylesheet" href="https://use.typekit.net/ehl7xwa.css">
+<style>
+  body { font-family: "brix-slab", arial; font-size: 48px; text-align: center; margin-top: 80px; }
+  .arial { font-family: arial; }
+</style>
+</head>
+<body>
+  <p>Test : Systèmes embarqués, Gaëtan, Françoise</p>
+  <p class="arial">Même texte en Arial</p>
+  <p id="h"></p>
+  <script>
+    function maj() { document.getElementById("h").textContent = new Date().toLocaleTimeString("fr-FR"); }
+    maj(); setInterval(maj, 1000);
+  </script>
+</body>
+</html>
