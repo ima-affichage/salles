@@ -1,0 +1,17 @@
+
+name: Test planification
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier le déclenchement
+        run: |
+          echo "Déclencheur : ${{ github.event_name }}"
+          date -u
+          
