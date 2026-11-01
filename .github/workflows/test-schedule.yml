@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "7,22,34,52,55 * * * *"
-  timezone: 'Europe/Paris'
+      timezone: 'Europe/Paris'
 
 jobs:
   test:
