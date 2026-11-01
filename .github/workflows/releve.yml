@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "17 3 * * *"      # chaque jour à 04:17 UTC (5h17 ou 6h17 à Paris)
     - cron: "17 4 * * *"      # une deuxième fois au cas où 
-    - cron: "20 5 * * *"     # pour le test
+    - cron: "37 5 * * *"     # pour le test
   workflow_dispatch:           # lancement manuel possible
     inputs:
       date:
