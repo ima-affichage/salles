@@ -4,7 +4,7 @@ name: Test planification
 on:
   workflow_dispatch:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "7,22,34,52 * * * *"
 
 jobs:
   test:
