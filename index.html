@@ -43,7 +43,10 @@ const HEURE_BASCULE = "13:00";   // limite matin / après-midi
 let DONNEES = null;
 async function charger() {
   try {
-    const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+    const r = await fetch(
+      "https://raw.githubusercontent.com/ima-affichage/salles/main/data.json?t=" + Date.now(),
+      { cache: "no-store" }
+    );
     if (!r.ok) throw new Error(r.status);
     DONNEES = await r.json();
   } catch (e) { DONNEES = null; }
