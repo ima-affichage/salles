@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   releve:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
