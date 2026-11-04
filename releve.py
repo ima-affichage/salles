@@ -14,7 +14,7 @@ import html
 import json
 import sys
 import time
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -61,9 +61,11 @@ def post_json(url, data):
 
 
 def evenements_du_jour(salles, jour):
+    # CELCAT utilise une date de fin exclusive : demander [jour, lendemain[.
+    lendemain = (date.fromisoformat(jour) + timedelta(days=1)).isoformat()
     data = {
         "start": jour,
-        "end": jour,
+        "end": lendemain,
         "resType": "102",
         "calView": "agendaDay",
         "colourScheme": "3",
@@ -107,10 +109,17 @@ def main():
     print(f"{len(salles)} salles, date {jour}")
 
     bruts = evenements_du_jour(salles, jour)
-    print(f"{len(bruts)} événements reçus")
+    if not isinstance(bruts, list):
+        raise RuntimeError("Réponse CELCAT inattendue : une liste d'événements était attendue")
+    # CELCAT peut renvoyer des événements du lendemain : conserver la date demandée.
+    evenements_jour = [
+        evt for evt in bruts
+        if isinstance(evt, dict) and str(evt.get("start") or "")[:10] == jour
+    ]
+    print(f"{len(bruts)} événements reçus, dont {len(evenements_jour)} pour le {jour}")
 
     vus, lignes, erreurs = set(), [], 0
-    for evt in bruts:
+    for evt in evenements_jour:
         if evt["id"] in vus:
             continue
         vus.add(evt["id"])
@@ -151,4 +160,5 @@ def main():
     print(f"OK : {len(lignes)} lignes écrites dans {SORTIE.name}")
 
 
-main()
+if __name__ == "__main__":
+    main()
