@@ -2,8 +2,7 @@ name: Relevé Celcat
 
 on:
   schedule:
-    - cron: '15 5 * * *'   # -> ce lance à 5:15 heure de Paris
-      timezone: 'Europe/Paris'
+    - cron: '5 * * * *'   # -> ce lance à 5:15 heure de Paris
   workflow_dispatch:  # lancement manuel possible           
     inputs:
       date:
