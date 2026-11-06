@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salles disponibles pour le travail en autonomie</title>
+  <link rel="stylesheet" href="https://use.typekit.net/ehl7xwa.css">
+  <style>
+    :root { --bleu:#0077B6; --bleu-nuit:#07527b; --pale:#edf7fc; --texte:#132a3a; --gris:#577386; }
+    * { box-sizing:border-box; }
+    html, body { margin:0; height:100%; }
+    body { min-height:100vh; min-height:100dvh; background:#fff; color:var(--texte);
+           font-family:"brix-slab",Arial,sans-serif; display:flex; flex-direction:column; overflow:hidden; }
+    header { background:var(--bleu); color:#fff;
+             padding:clamp(20px,1.7vw,34px) clamp(18px,2.6vw,52px);
+             text-align:center; }
+    h1 { margin:0; font-weight:700; font-size:clamp(23px,2.6vw,48px); line-height:1.12; }
+    main { flex:1; min-height:0; padding:clamp(16px,1.7vw,32px) clamp(16px,2vw,42px);
+           display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(14px,1.7vw,30px); }
+    .periode { display:flex; flex-direction:column; min-width:0; min-height:0; border:2px solid #cfe4f0;
+               border-radius:18px; overflow:hidden; }
+    .titre-periode { background:var(--pale); border-bottom:2px solid #cfe4f0;
+                     display:flex; align-items:center; justify-content:space-between;
+                     gap:8px; padding:clamp(12px,1.2vw,22px) clamp(12px,1.5vw,28px); }
+    h2 { color:var(--bleu-nuit); font-size:clamp(23px,2.2vw,40px); margin:0; }
+    .horaires { font:600 clamp(15px,1.28vw,23px) Arial,sans-serif; color:var(--bleu-nuit); }
+    .grille { flex:1; min-height:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+              align-content:start; grid-auto-rows:minmax(0,1fr); gap:clamp(7px,.75vw,14px);
+              padding:clamp(13px,1.25vw,24px); }
+    .salle { background:var(--bleu); color:#fff; display:flex; align-items:center; justify-content:center;
+             text-align:center; padding:clamp(8px,.9vw,14px); border-radius:11px;
+             font-size:clamp(17px,1.6vw,31px); font-weight:700; line-height:1.12; overflow-wrap:anywhere;
+             min-height:clamp(48px,5.5vh,90px); }
+    .compte { color:var(--bleu-nuit); font:600 clamp(14px,1vw,20px) Arial,sans-serif;
+              margin-left:7px; white-space:nowrap; }
+    .vide { grid-column:1/-1; display:flex; align-items:center; justify-content:center; text-align:center;
+            color:var(--gris); font-size:clamp(18px,1.6vw,30px); line-height:1.4; padding:25px; }
+    #alerte { grid-column:1/-1; display:flex; justify-content:center; align-items:center; text-align:center;
+              font-size:clamp(24px,3vw,52px); color:var(--bleu-nuit); padding:30px; }
+    @media(max-width:800px) {
+      body { overflow:auto; }
+      main { grid-template-columns:1fr; }
+      .grille { grid-auto-rows:auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Salles disponibles pour le travail en autonomie</h1>
+  </header>
+  <main id="contenu" aria-live="polite">
+    <div id="alerte">Chargement des disponibilités…</div>
+  </main>
+  <script>
+    "use strict";
+    // data.json doit être servi depuis le même dossier que cette page,
+    // sur GitHub Pages ou sur tout autre serveur HTTP (y compris localhost).
+    const estLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
+    const SOURCE = "./data.json";
+    const parisJour = () => new Date().toLocaleDateString("sv-SE", {timeZone:"Europe/Paris"});
+    const heures = (plage) => Array.isArray(plage) && plage.length === 2
+      ? plage[0] + " – " + plage[1] : "";
+    const contenu = document.getElementById("contenu");
+
+    function afficherMessage(texte) {
+      contenu.replaceChildren();
+      const element = document.createElement("div");
+      element.id = "alerte";
+      element.textContent = texte;
+      contenu.appendChild(element);
+    }
+    function creerPeriode(titre, tranche, liste, horaires) {
+      const section = document.createElement("section");
+      section.className = "periode";
+      const entete = document.createElement("div");
+      entete.className = "titre-periode";
+      const nom = document.createElement("h2");
+      nom.textContent = titre;
+      const meta = document.createElement("div");
+      meta.className = "horaires";
+      meta.textContent = heures(horaires[tranche]);
+      entete.append(nom, meta);
+      const grille = document.createElement("div");
+      grille.className = "grille";
+      if (!liste.length) {
+        const vide = document.createElement("div");
+        vide.className = "vide";
+        vide.textContent = "Aucune salle libre pendant toute cette demi-journée";
+        grille.appendChild(vide);
+      } else {
+        for (const salle of liste) {
+          const cellule = document.createElement("div");
+          cellule.className = "salle";
+          cellule.textContent = salle;
+          grille.appendChild(cellule);
+        }
+      }
+      section.append(entete, grille);
+      return section;
+    }
+
+    function afficherDonnees(data) {
+      const dispo = data.disponibilites;
+      // Les dates de test (ex. 2026-12-01) sont autorisées uniquement en local.
+      // Sur GitHub Pages / Xibo, nous n'affichons jamais des données périmées.
+      if (!estLocal && data.date !== parisJour()) {
+          afficherMessage("Disponibilités non actualisées");
+          return;
+        }
+        if (!dispo || !Array.isArray(dispo.matin) || !Array.isArray(dispo.apres_midi) || !dispo.horaires) {
+          afficherMessage("Disponibilités indisponibles");
+          return;
+        }
+        if (dispo.verifiees !== true) {
+          afficherMessage("Disponibilités non vérifiables");
+          return;
+        }
+        const matin = creerPeriode("Matin", "matin", dispo.matin, dispo.horaires);
+        const aprem = creerPeriode("Après-midi", "apres_midi", dispo.apres_midi, dispo.horaires);
+        contenu.replaceChildren(matin, aprem);
+    }
+
+    async function actualiser() {
+      try {
+        const reponse = await fetch(SOURCE + "?t=" + Date.now(), {cache:"no-store"});
+        if (!reponse.ok) throw new Error("HTTP " + reponse.status);
+        afficherDonnees(await reponse.json());
+      } catch (erreur) {
+        afficherMessage("Disponibilités momentanément indisponibles");
+        console.error("Chargement des disponibilités :", erreur);
+      }
+    }
+
+    actualiser();
+    setInterval(actualiser, 60 * 1000);
+  </script>
+</body>
+</html>
